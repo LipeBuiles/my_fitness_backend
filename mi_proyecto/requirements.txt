@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pymysql
+sqlalchemy
+python-dotenv
+sentry-sdk[fastapi]
+pydantic-settings
