@@ -4,6 +4,7 @@ from typing import List
 import bcrypt
 
 from ..models.models import User as UserModel
+from ..models.models import TypeTraining as TypeTrainingModel
 from .. import schemas
 from ..dependencies import get_db
 
@@ -79,3 +80,83 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@router.post("/type-training/", response_model=schemas.TypeTraining)
+def create_type_training(
+    type_training: schemas.TypeTrainingCreate, db: Session = Depends(get_db)
+):
+    type_training_data = type_training.model_dump()
+    db_type_training = TypeTrainingModel(**type_training_data)
+    db.add(db_type_training)
+    db.commit()
+    db.refresh(db_type_training)
+    return db_type_training
+
+
+@router.get(
+    "/type-training/",
+    response_model=List[schemas.TypeTraining]
+)
+def read_type_trainings(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
+    type_trainings = db.query(TypeTrainingModel).offset(skip).limit(
+        limit
+    ).all()
+    return type_trainings
+
+
+@router.get(
+    "/type-training/{type_training_id}",
+    response_model=schemas.TypeTraining
+)
+def read_type_training(type_training_id: int, db: Session = Depends(get_db)):
+    db_type_training = db.query(TypeTrainingModel).filter(
+        TypeTrainingModel.id == type_training_id
+    ).first()
+    if db_type_training is None:
+        raise HTTPException(status_code=404, detail="Type Training not found")
+    return db_type_training
+
+
+@router.put(
+    "/type-training/{type_training_id}",
+    response_model=schemas.TypeTraining
+)
+def update_type_training(
+    type_training_id: int,
+    type_training: schemas.TypeTrainingUpdate,
+    db: Session = Depends(get_db)
+):
+    db_type_training = db.query(TypeTrainingModel).filter(
+        TypeTrainingModel.id == type_training_id
+    ).first()
+    if db_type_training is None:
+        raise HTTPException(status_code=404, detail="Type Training not found")
+    
+    update_data = type_training.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(db_type_training, key, value)
+    
+    db.add(db_type_training)
+    db.commit()
+    db.refresh(db_type_training)
+    return db_type_training
+
+
+@router.delete(
+    "/type-training/{type_training_id}",
+    response_model=schemas.TypeTraining
+)
+def delete_type_training(type_training_id: int, db: Session = Depends(get_db)):
+    db_type_training = db.query(TypeTrainingModel).filter(
+        TypeTrainingModel.id == type_training_id
+    ).first()
+    if db_type_training is None:
+        raise HTTPException(status_code=404, detail="Type Training not found")
+    
+    db.delete(db_type_training)
+    db.commit()
+    return db_type_training

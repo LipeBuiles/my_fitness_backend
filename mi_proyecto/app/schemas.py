@@ -20,7 +20,27 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
+
 class User(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class TypeTrainingBase(BaseModel):
+    name: Optional[str] = None
+
+
+class TypeTrainingCreate(TypeTrainingBase):
+    name: str
+
+
+class TypeTrainingUpdate(TypeTrainingBase):
+    pass
+
+
+class TypeTraining(TypeTrainingBase):
     id: int
 
     class Config:
