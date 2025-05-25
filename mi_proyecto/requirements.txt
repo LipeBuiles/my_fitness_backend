@@ -1,7 +1,11 @@
 fastapi
 uvicorn[standard]
 pymysql
+mysqlclient
 sqlalchemy
 python-dotenv
 sentry-sdk[fastapi]
 pydantic-settings
+email-validator
+cryptography
+bcrypt

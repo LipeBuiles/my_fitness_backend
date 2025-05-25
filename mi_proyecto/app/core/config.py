@@ -1,13 +1,13 @@
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
-    mysql_user: str
-    mysql_password: str
-    mysql_database: str
-    mysql_root_password: str
-    sentry_dsn: str = ""  # Opcional para que no falle en desarrollo sin Sentry
+    sentry_dsn: str = ""
+    DATABASE_URL: str
 
     class Config:
         env_file = ".env"
+        extra = 'ignore'  # Allow and ignore extra fields from .env
+
 
 settings = Settings()
