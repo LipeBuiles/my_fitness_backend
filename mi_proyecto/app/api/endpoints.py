@@ -5,6 +5,7 @@ import bcrypt
 
 from ..models.models import User as UserModel
 from ..models.models import TypeTraining as TypeTrainingModel
+from ..models.models import ObjetivesDay as ObjetivesDayModel
 from .. import schemas
 from ..dependencies import get_db
 
@@ -160,3 +161,69 @@ def delete_type_training(type_training_id: int, db: Session = Depends(get_db)):
     db.delete(db_type_training)
     db.commit()
     return db_type_training
+
+
+# CRUD operations for ObjetivesDay
+@router.post("/objetives-day/", response_model=schemas.ObjetivesDay)
+def create_objetives_day(
+    objetives_day: schemas.ObjetivesDayCreate, db: Session = Depends(get_db)
+):
+    objetives_day_data = objetives_day.model_dump()
+    db_objetives_day = ObjetivesDayModel(**objetives_day_data)
+    db.add(db_objetives_day)
+    db.commit()
+    db.refresh(db_objetives_day)
+    return db_objetives_day
+
+
+@router.get("/objetives-day/", response_model=List[schemas.ObjetivesDay])
+def read_objetives_days(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
+    objetives_days = db.query(ObjetivesDayModel).offset(skip).limit(
+        limit
+    ).all()
+    return objetives_days
+
+
+@router.get(
+    "/objetives-day/{objetives_day_id}", 
+    response_model=schemas.ObjetivesDay
+)
+def read_objetives_day(objetives_day_id: int, db: Session = Depends(get_db)):
+    db_objetives_day = (
+        db.query(ObjetivesDayModel)
+        .filter(ObjetivesDayModel.id == objetives_day_id)
+        .first()
+    )
+    if db_objetives_day is None:
+        raise HTTPException(status_code=404, detail="ObjetivesDay not found")
+    return db_objetives_day
+
+
+@router.put(
+    "/objetives-day/{objetives_day_id}", 
+    response_model=schemas.ObjetivesDay
+)
+def update_objetives_day(
+    objetives_day_id: int,
+    objetives_day: schemas.ObjetivesDayUpdate,
+    db: Session = Depends(get_db),
+):
+    db_objetives_day = (
+        db.query(ObjetivesDayModel)
+        .filter(ObjetivesDayModel.id == objetives_day_id)
+        .first()
+    )
+    if db_objetives_day is None:
+        raise HTTPException(status_code=404, detail="ObjetivesDay not found")
+
+    update_data = objetives_day.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(db_objetives_day, key, value)
+
+    db.add(db_objetives_day)
+    db.commit()
+    db.refresh(db_objetives_day)
+    return db_objetives_day
